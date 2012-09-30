@@ -1,14 +1,14 @@
 		LBI - Lua Bytecode Interpreter
 
 About:
-	LBI is a bytecode interpreter for Lua written in Lua. It aims to allow the safe
-	and fast emulation of Lua bytecode where using the standard C facilities for
-	this takes would be dangerous.
+	LBI is a bytecode interpreter for Lua written in Lua. It aims to allow the
+	safe and fast emulation of Lua bytecode where using the standard C 
+	facilities for this takes would be dangerous.
 
 Usage:
 	Call the function `load_bytecode` which is defined in ./src/main.lua
-	It will act like the stdlib function `loadstring` except it only will accept
-	Lua bytecode (i.e. strings beginning with '\27')
+	It will act like the stdlib function `loadstring` except it only will
+	accept Lua bytecode (i.e. strings beginning with '\27')
 
 License:
 	LBI is distributed under the MIT license. See ./LICENSE
