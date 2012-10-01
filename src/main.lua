@@ -525,7 +525,16 @@ local function create_wrapper(cache)
 		end
 	end
 
-	return function(...)
+	local debugging = {
+		get_stack = function()
+			return stack;
+		end;
+		get_IP = function()
+			return IP;
+		end
+	};
+
+	function func(...)
 		local local_stack = {};
 		local ghost_stack = {}
 
@@ -577,9 +586,24 @@ local function create_wrapper(cache)
 			end
 		end
 	end
+
+	return debugging, func;
 end
 
-function load_bytecode(bytecode)
-	local cache = decode_bytecode(bytecode);
-	return create_wrapper(cache);
-end
+return {
+	load_bytecode = function(bytecode)
+		local cache = decode_bytecode(bytecode);
+		local _, func = create_wrapper(cache);
+		return func;
+	end;
+
+	-- Utilities (Debug, Introspection, Testing, etc)
+	utils = {
+		decode_bytecode = decode_bytecode;
+		create_wrapper = create_wrapper;
+		debug_bytecode = function(bytecode)
+			local cache = decode_bytecode(bytecode)
+			return create_wrapper(cache);
+		end;
+	};
+}
