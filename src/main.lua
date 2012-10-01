@@ -271,7 +271,7 @@ local function create_wrapper(cache)
 				IP = IP + 1
 			end
 		end,
-		[3]  = function(instruction)	-- LOADNILL
+		[3]  = function(instruction)	-- LOADNIL
 			local stack = stack
 			for i = instruction.A, instruction.B do
 				stack[i] = nil
