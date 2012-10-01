@@ -257,7 +257,7 @@ local function create_wrapper(cache)
 	local stack, top
 	local environment = getfenv(1);	-- get the wrapper's environment
 	local IP = 1;	-- instruction pointer
-	
+
 	local opcode_funcs = setmetatable({
 		[0]  = function(instruction)	-- MOVE
 			stack[instruction.A] = stack[instruction.B];
@@ -431,7 +431,6 @@ local function create_wrapper(cache)
 					args[#args+1] = stack[i];
 				end
 				
-				print("call",A, B, top)
 				results = {stack[A](unpack(args, 1, top-A))};
 			else
 				results = {stack[A]()};
@@ -466,7 +465,6 @@ local function create_wrapper(cache)
 					args[#args+1] = stack[i];
 				end
 				
-				print(B-1, top-A)
 				results = {stack[A](unpack(args, 1, top-A))};
 			else
 				results = {stack[A]()};
