@@ -3,7 +3,7 @@
 About:
 	LBI is a bytecode interpreter for Lua written in Lua. It aims to allow
 	the safe and fast emulation of Lua bytecode where using the standard C 
-	facilities for this takes would be dangerous.
+	facilities for this would be dangerous.
 
 Usage:
 	Call the function `load_bytecode` which is defined in ./src/main.lua
