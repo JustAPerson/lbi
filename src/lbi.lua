@@ -534,7 +534,7 @@ local function create_wrapper(cache)
 		end
 	};
 
-	function func(...)
+	local function func(...)
 		local local_stack = {};
 		local ghost_stack = {}
 
