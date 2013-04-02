@@ -294,6 +294,16 @@ local function create_wrapper(cache)
 			local key = constants[instruction.Bx].data;
 			environment[key] = stack[instruction.A];
 		end,
+		[9] = function (instruction)	-- SETTABLE
+			local B = instruction.B;
+			local C = instruction.C;
+			local stack, constants = stack, constants;
+			
+			B = B > 255 and constants[B-256].data or stack[B];
+			C = C > 255 and constants[C-256].data or stack[C];
+			
+			stack[instruction.A][B] = C
+		end,
 		[12] = function(instruction)	-- ADD
 			local B = instruction.B;
 			local C = instruction.C;
