@@ -307,6 +307,18 @@ local function create_wrapper(cache)
 		[10] = function (instruction)	-- NEWTABLE
 			stack[instruction.A] = {}
 		end,
+		[11] = function (instruction)	-- SELF
+			local A = instruction.A
+			local B = instruction.B
+			local C = instruction.C
+			local stack = stack
+			
+			B = stack[B]
+			C = C > 255 and constants[C-256].data or stack[C]
+			
+			stack[A+1] = B
+			stack[A]   = B[C]
+		end,
 		[12] = function(instruction)	-- ADD
 			local B = instruction.B;
 			local C = instruction.C;
