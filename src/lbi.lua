@@ -184,7 +184,7 @@ local function decode_bytecode(bytecode)
 		do
 			num = get_int();
 			for i = 1, num do
-				prototypes[i] = decode_chunk();
+				prototypes[i-1] = decode_chunk();
 			end
 		end
 
@@ -249,7 +249,7 @@ local function decode_bytecode(bytecode)
 	return decode_chunk();
 end
 
-local function create_wrapper(cache)
+local function create_wrapper(cache, upvalues)
 	local instructions = cache.instructions;
 	local constants    = cache.constants;
 	local prototypes   = cache.prototypes;
@@ -278,6 +278,9 @@ local function create_wrapper(cache)
 				stack[i] = nil
 			end
 		end,
+		[4] = function(instruction)		-- GETUPVAL
+			stack[instruction.A] = upvalues[instruction.B]
+		end,
 		[5]  = function(instruction)	-- GETGLOBAL
 			local key = constants[instruction.Bx].data;
 			stack[instruction.A] = environment[key];
@@ -294,6 +297,9 @@ local function create_wrapper(cache)
 		[7]  = function(instruction)	-- SETGLOBAL
 			local key = constants[instruction.Bx].data;
 			environment[key] = stack[instruction.A];
+		end,
+		[8] = function (instruction)	-- SETUPVAL
+			upvalues[instruction.B] = stack[instruction.A]
 		end,
 		[9] = function (instruction)	-- SETTABLE
 			local B = instruction.B;
@@ -613,6 +619,41 @@ local function create_wrapper(cache)
 					t[offset+i] = stack[A+i]	
 				end				
 			end
+		end,
+		[35] = function(instruction)	-- CLOSE
+			io.stderr:write("NYI: CLOSE")
+			io.stderr:flush()
+		end,
+		[36] = function(instruction)	-- CLOSURE
+			local proto = prototypes[instruction.Bx]
+			local instructions = instructions
+			local stack = stack
+			
+			local indices = {}
+			local new_upvals = setmetatable({},
+				{
+					__index = function(t, k)
+						local upval = indices[k]
+						return upval.segment[upval.offset]
+					end,
+					__newindex = function(t, k, v)
+						local upval = indices[k]
+						upval.segment[upval.offset] = v
+					end
+				}
+			)
+			for i = 1, proto.upvalues do
+				local movement = instructions[IP]
+				if movement.opcode == 0 then -- MOVE
+					indices[i-1] = {segment = stack, offset = movement.B}
+				elseif instructions[IP].opcode == 4 then -- GETUPVAL
+					indices[i-1] = {segment = upvalues, offset = movement.B}
+				end
+				IP = IP + 1
+			end
+			
+			local _, func = create_wrapper(proto, new_upvals)
+			stack[instruction.A] = func
 		end,
 		[37] = function(instruction)	-- VARARG
 			local A = instruction.A
