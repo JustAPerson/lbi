@@ -548,6 +548,51 @@ local function create_wrapper(cache)
 			end
 			return true, output;
 		end,
+		[31] = function(instruction)	-- FORLOOP
+			local A = instruction.A
+			local stack = stack
+			
+			local step = stack[A+2]
+			local index = stack[A] + step 
+			stack[A] = index
+			
+			if step > 0 then
+				if index <= stack[A+1] then
+					IP = IP + instruction.sBx
+					stack[A+3] = index
+				end
+			else
+				if index >= stack[A+1] then
+					IP = IP + instruction.sBx
+					stack[A+3] = index
+				end
+			end
+		end,
+		[32] = function(instruction)	-- FORPREP
+			local A = instruction.A
+			local stack = stack
+			
+			stack[A] = stack[A] - stack[A+2]
+			IP = IP + instruction.sBx 
+		end,
+		[33] = function(instruction)	-- TFORLOOP
+			local A = instruction.A
+			local B = instruction.B
+			local C = instruction.C
+			local stack = stack
+			
+			local offset = A+2
+			local result = {stack[A](stack[A+1], stack[A+2])}
+			for i = 1, C do
+				stack[offset+i] = result[i]
+			end
+			
+			if stack[A+3] ~= nil then
+				stack[A+2] = stack[A+3]
+			else
+				IP = IP + 1
+			end
+		end,
 	},{__index = function(t, k)
 		return rawget(t, k) or
 		       error(("NYI: %s (%s)"):format(lua_opcode_names[k+1], k));
