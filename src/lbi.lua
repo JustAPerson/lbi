@@ -593,6 +593,26 @@ local function create_wrapper(cache)
 				IP = IP + 1
 			end
 		end,
+		[34] = function(instruction)	-- SETLIST
+			local A = instruction.A
+			local B = instruction.B
+			local C = instruction.C
+			local stack = stack
+
+			if C == 0 then
+				error("NYI: extended SETLIST")
+			else
+				local offset = (C - 1) * 50
+				local t = stack[A]
+				
+				if B == 0 then
+					B = top
+				end
+				for i = 1, B do
+					t[offset+i] = stack[A+i]	
+				end				
+			end
+		end,
 	},{__index = function(t, k)
 		return rawget(t, k) or
 		       error(("NYI: %s (%s)"):format(lua_opcode_names[k+1], k));
