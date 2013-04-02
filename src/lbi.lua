@@ -259,7 +259,7 @@ local function create_wrapper(cache, upvalues)
 	local IP = 1;	-- instruction pointer
 	local vararg, vararg_size 
 
-	local opcode_funcs = setmetatable({
+	local opcode_funcs = {
 		[0]  = function(instruction)	-- MOVE
 			stack[instruction.A] = stack[instruction.B];
 		end,
@@ -664,10 +664,7 @@ local function create_wrapper(cache, upvalues)
 				stack[i] = vararg[i - A]
 			end
 		end,
-	},{__index = function(t, k)
-		return rawget(t, k) or
-		       error(("NYI: %s (%s)"):format(lua_opcode_names[k+1], k));
-	end});
+	}
 	
 	local function loop()
 		local instructions = instructions
