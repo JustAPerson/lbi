@@ -438,6 +438,11 @@ local function create_wrapper(cache)
 				IP = IP + 1
 			end		
 		end,
+		[26] = function(instruction)	-- TEST
+			if stack[instruction.A] == (instruction.C ~= 0) then
+				IP = IP + 1
+			end
+		end,
 		[28] = function(instruction)	-- CALL
 			local A = instruction.A;
 			local B = instruction.B;
