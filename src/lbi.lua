@@ -419,29 +419,36 @@ local function create_wrapper(cache)
 			local C = instruction.C;
 			local stack = stack;
 			local args, results;
-			local top, loop = top
+			local top, limit, loop = top
 			
 			args = {};
 			if B ~= 1 then
 				if B ~= 0 then
-					top = A+B-1;
+					limit = A+B-1;
+				else
+					limit = top
 				end
 				
-				for i = A+1, top do
-					args[#args+1] = stack[i];
+				loop = 0
+				for i = A+1, limit do
+					loop = loop + 1
+					args[loop] = stack[i];
 				end
 				
-				results = {stack[A](unpack(args, 1, top-A))};
+				results = {stack[A](unpack(args, 1, limit-A))};
 			else
 				results = {stack[A]()};
 			end
 			
 			if C ~= 1 then
 				if C ~= 0 then
-					top = A+C-2;
+					limit = A+C-2;
+				else
+					limit = top
 				end
+				
 				loop = 0;
-				for i = A, top do
+				for i = A, limit do
 					loop = loop + 1;
 					stack[i] = results[loop];
 				end
@@ -453,33 +460,28 @@ local function create_wrapper(cache)
 			local C = instruction.C;
 			local stack = stack;
 			local args, results;
-			local top, loop = top
+			local top, limit, loop = top
 			
 			args = {};
 			if B ~= 1 then
 				if B ~= 0 then
-					top = A+B-1;
+					limit = A+B-1;
+				else
+					limit = top
 				end
 				
-				for i = A+1, top do
+				loop = 0
+				for i = A+1, limit do
+					loop = loop + 1
 					args[#args+1] = stack[i];
 				end
 				
-				results = {stack[A](unpack(args, 1, top-A))};
+				results = {stack[A](unpack(args, 1, limit-A))};
 			else
 				results = {stack[A]()};
 			end
 			
-			if C ~= 1 then
-				if C ~= 0 then
-					top = A+C-2;
-				end
-				loop = 0;
-				for i = A, top do
-					loop = loop + 1;
-					stack[i] = results[loop];
-				end
-			end
+			return true, results
 		end,
 		[30] = function(instruction) -- RETURN
 			--TODO: CLOSE
