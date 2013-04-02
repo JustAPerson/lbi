@@ -257,6 +257,7 @@ local function create_wrapper(cache)
 	local stack, top
 	local environment = getfenv(1);	-- get the wrapper's environment
 	local IP = 1;	-- instruction pointer
+	local vararg, vararg_size 
 
 	local opcode_funcs = setmetatable({
 		[0]  = function(instruction)	-- MOVE
@@ -613,6 +614,15 @@ local function create_wrapper(cache)
 				end				
 			end
 		end,
+		[37] = function(instruction)	-- VARARG
+			local A = instruction.A
+			local B = instruction.B
+			local stack, vararg = stack, vararg
+			
+			for i = A, A + (B > 0 and B - 1 or vararg_size) do
+				stack[i] = vararg[i - A]
+			end
+		end,
 	},{__index = function(t, k)
 		return rawget(t, k) or
 		       error(("NYI: %s (%s)"):format(lua_opcode_names[k+1], k));
@@ -656,11 +666,12 @@ local function create_wrapper(cache)
 			end;
 		})
 		local args = {...};	
-		for i = 0, select("#", ...) - 1 do
+		vararg = {}
+		vararg_size = select("#", ...) - 1
+		for i = 0, vararg_size do
 			local_stack[i] = args[i+1];
+			vararg[i] = args[i+1]
 		end
-		
-		
 		
 		environment = getfenv();
 		IP = 1;
