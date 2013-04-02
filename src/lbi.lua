@@ -443,6 +443,16 @@ local function create_wrapper(cache)
 				IP = IP + 1
 			end
 		end,
+		[27] = function(instruction)	-- TESTSET
+			local stack = stack
+			local B = stack[instruction.B]
+			
+			if B == (instruction.C ~= 0) then
+				IP = IP + 1
+			else
+				stack[instruction.A] = B
+			end
+		end,
 		[28] = function(instruction)	-- CALL
 			local A = instruction.A;
 			local B = instruction.B;
