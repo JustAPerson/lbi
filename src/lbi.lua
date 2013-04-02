@@ -536,7 +536,7 @@ local function create_wrapper(cache)
 
 	local function func(...)
 		local local_stack = {};
-		local ghost_stack = {}
+		local ghost_stack = {};
 
 		top = -1
 		stack = setmetatable(local_stack, {
@@ -557,8 +557,8 @@ local function create_wrapper(cache)
 		
 		environment = getfenv();
 		IP = 1;
-		loop = coroutine.create(loop)
-		local a, b = coroutine.resume(loop)
+		local thread = coroutine.create(loop)
+		local a, b = coroutine.resume(thread)
 
 		if a then
 			if b then
