@@ -599,18 +599,16 @@ local function create_wrapper(cache)
 	end});
 	
 	local function loop()
+		local instructions = instructions
 		local instruction, a, b
-		local local_IP = IP;
 		
 		while true do
-			instruction = instructions[local_IP];
+			instruction = instructions[IP];
+			IP = IP + 1
 			a, b = opcode_funcs[instruction.opcode](instruction);
 			if a then
 				return b;
 			end
-			
-			local_IP = IP + 1;
-			IP = local_IP;
 		end
 	end
 
