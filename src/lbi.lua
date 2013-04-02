@@ -488,21 +488,23 @@ local function create_wrapper(cache)
 			local A = instruction.A;
 			local B = instruction.B;
 			local stack = stack;
-			local loop;
-			local output;
+			local limit;
+			local loop, output;
 						
 			if B == 1 then
 				return true;
 			end
 			if B == 0 then
-				loop = top
+				limit = top
 			else
-				loop = A + B - 2;
+				limit = A + B - 2;
 			end
 			
 			output = {};
-			for i = A, loop do
-				output[#output + 1] = stack[i];
+			local loop = 0
+			for i = A, limit do
+				loop = loop + 1
+				output[loop] = stack[i];
 			end
 			return true, output;
 		end,
