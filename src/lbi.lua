@@ -249,13 +249,19 @@ local function decode_bytecode(bytecode)
 	return decode_chunk();
 end
 
+local function handle_return(...)
+	local c = select("#", ...)
+	local t = {...}
+	return c, t
+end
+
 local function create_wrapper(cache, upvalues)
 	local instructions = cache.instructions;
 	local constants    = cache.constants;
 	local prototypes   = cache.prototypes;
 	
 	local stack, top
-	local environment = getfenv(1);	-- get the wrapper's environment
+	local environment
 	local IP = 1;	-- instruction pointer
 	local vararg, vararg_size 
 
@@ -286,13 +292,10 @@ local function create_wrapper(cache, upvalues)
 			stack[instruction.A] = environment[key];
 		end,
 		[6]  = function(instruction)	-- GETTABLE
-			local index = instruction.C;
-			if index > 255 then
-				index = constants[index - 256].data;
-			else
-				index = stack[index];
-			end
-			stack[instruction.A] = stack[instruction.B][index];
+			local C = instruction.C
+			local stack = stack
+			C = C > 255 and constants[C-256].data or stack[C]
+			stack[instruction.A] = stack[instruction.B][C];
 		end,
 		[7]  = function(instruction)	-- SETGLOBAL
 			local key = constants[instruction.Bx].data;
@@ -466,7 +469,7 @@ local function create_wrapper(cache, upvalues)
 			local C = instruction.C;
 			local stack = stack;
 			local args, results;
-			local top, limit, loop = top
+			local limit, loop
 			
 			args = {};
 			if B ~= 1 then
@@ -482,16 +485,18 @@ local function create_wrapper(cache, upvalues)
 					args[loop] = stack[i];
 				end
 				
-				results = {stack[A](unpack(args, 1, limit-A))};
+				limit, results = handle_return(stack[A](unpack(args, 1, limit-A)))
 			else
-				results = {stack[A]()};
+				limit, results = handle_return(stack[A]())
 			end
 			
+			top = A - 1
+		
 			if C ~= 1 then
 				if C ~= 0 then
 					limit = A+C-2;
 				else
-					limit = top
+					limit = limit+A
 				end
 				
 				loop = 0;
@@ -697,7 +702,7 @@ local function create_wrapper(cache, upvalues)
 		stack = setmetatable(local_stack, {
 			__index = ghost_stack;
 			__newindex = function(t, k, v)
-				if k > top then
+				if k > top and v then
 					top = k
 				end
 				ghost_stack[k] = v
