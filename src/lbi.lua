@@ -449,7 +449,8 @@ local function create_wrapper(cache, upvalues)
 			end		
 		end,
 		[26] = function(instruction)	-- TEST
-			if stack[instruction.A] == (instruction.C ~= 0) then
+			local A = stack[instruction.A];
+			if (not not A) == (instruction.C == 0) then
 				IP = IP + 1
 			end
 		end,
@@ -457,7 +458,7 @@ local function create_wrapper(cache, upvalues)
 			local stack = stack
 			local B = stack[instruction.B]
 			
-			if B == (instruction.C ~= 0) then
+			if (not not B) == (instruction.C == 0) then
 				IP = IP + 1
 			else
 				stack[instruction.A] = B
