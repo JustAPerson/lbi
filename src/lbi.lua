@@ -416,8 +416,8 @@ local function create_wrapper(cache, upvalues)
 			local stack, constants = stack, constants
 			
 			A = A ~= 0
-			B = B > 255 and constants[B-256].data or stack[B]
-			C = C > 255 and constants[C-256].data or stack[C]
+			if (B > 255) then B = constants[B-256].data else B = stack[B] end
+			if (C > 255) then C = constants[C-256].data else C = stack[C] end
 			if (B == C) ~= A then
 				IP = IP + 1
 			end
