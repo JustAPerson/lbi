@@ -1,6 +1,6 @@
 local lua_opcode_types = {
 	"ABC",  "ABx", "ABC",  "ABC",
-	"ABC",  "ABx", "ABC",  "ABx", 
+	"ABC",  "ABx", "ABC",  "ABx",
 	"ABC",  "ABC", "ABC",  "ABC",
 	"ABC",  "ABC", "ABC",  "ABC",
 	"ABC",  "ABC", "ABC",  "ABC",
@@ -119,7 +119,7 @@ local function decode_bytecode(bytecode)
 		chunk.last_line  = get_int();	-- Last  line
 
         if chunk.name then chunk.name = chunk.name:sub(1, -2); end
-		
+
 		chunk.upvalues  = get_int8();
 		chunk.arguments = get_int8();
 		chunk.varg      = get_int8();
@@ -142,7 +142,7 @@ local function decode_bytecode(bytecode)
 
 				instruction.opcode = opcode;
 				instruction.type   = type;
-				
+
 				instruction.A = get_bits(data, 7, 14);
 				if type == "ABC" then
 					instruction.B = get_bits(data, 24, 32);
@@ -259,11 +259,11 @@ local function create_wrapper(cache, upvalues)
 	local instructions = cache.instructions;
 	local constants    = cache.constants;
 	local prototypes   = cache.prototypes;
-	
+
 	local stack, top
 	local environment
 	local IP = 1;	-- instruction pointer
-	local vararg, vararg_size 
+	local vararg, vararg_size
 
 	local opcode_funcs = {
 		[0]  = function(instruction)	-- MOVE
@@ -308,10 +308,10 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
+
 			stack[instruction.A][B] = C
 		end,
 		[10] = function (instruction)	-- NEWTABLE
@@ -322,10 +322,10 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B
 			local C = instruction.C
 			local stack = stack
-			
+
 			B = stack[B]
 			C = C > 255 and constants[C-256].data or stack[C]
-			
+
 			stack[A+1] = B
 			stack[A]   = B[C]
 		end,
@@ -333,61 +333,61 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
+
 			stack[instruction.A] = B+C;
 		end,
 		[13] = function(instruction)	-- SUB
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
-			stack[instruction.A] = B - C;	
+
+			stack[instruction.A] = B - C;
 		end,
 		[14] = function(instruction)	-- MUL
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
+
 			stack[instruction.A] = B * C;
 		end,
 		[15] = function(instruction)	--DIV
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
+
 			stack[instruction.A] = B / C;
 		end,
 		[16] = function(instruction) 	-- MOD
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
-			stack[instruction.A] = B % C;		
+
+			stack[instruction.A] = B % C;
 		end,
 		[17] = function(instruction)	-- POW
 			local B = instruction.B;
 			local C = instruction.C;
 			local stack, constants = stack, constants;
-			
+
 			B = B > 255 and constants[B-256].data or stack[B];
 			C = C > 255 and constants[C-256].data or stack[C];
-			
-			stack[instruction.A] = B ^ C;		
+
+			stack[instruction.A] = B ^ C;
 		end,
 		[18] = function(instruction)	-- UNM
 			stack[instruction.A] = -stack[instruction.B]
@@ -402,7 +402,7 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B
 			local result = stack[B]
 			for i = B+1, instruction.C do
-				result = result .. stack[i] 
+				result = result .. stack[i]
 			end
 			stack[instruction.A] = result
 		end,
@@ -414,7 +414,7 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B
 			local C = instruction.C
 			local stack, constants = stack, constants
-			
+
 			A = A ~= 0
 			if (B > 255) then B = constants[B-256].data else B = stack[B] end
 			if (C > 255) then C = constants[C-256].data else C = stack[C] end
@@ -427,26 +427,26 @@ local function create_wrapper(cache, upvalues)
 			local B = instruction.B
 			local C = instruction.C
 			local stack, constants = stack, constants
-			
+
 			A = A ~= 0
 			B = B > 255 and constants[B-256].data or stack[B]
 			C = C > 255 and constants[C-256].data or stack[C]
 			if (B < C) ~= A then
 				IP = IP + 1
-			end		
+			end
 		end,
 		[25] = function(instruction)	-- LT
 			local A = instruction.A
 			local B = instruction.B
 			local C = instruction.C
 			local stack, constants = stack, constants
-			
+
 			A = A ~= 0
 			B = B > 255 and constants[B-256].data or stack[B]
 			C = C > 255 and constants[C-256].data or stack[C]
 			if (B <= C) ~= A then
 				IP = IP + 1
-			end		
+			end
 		end,
 		[26] = function(instruction)	-- TEST
 			local A = stack[instruction.A];
@@ -457,7 +457,7 @@ local function create_wrapper(cache, upvalues)
 		[27] = function(instruction)	-- TESTSET
 			local stack = stack
 			local B = stack[instruction.B]
-			
+
 			if (not not B) == (instruction.C == 0) then
 				IP = IP + 1
 			else
@@ -471,7 +471,7 @@ local function create_wrapper(cache, upvalues)
 			local stack = stack;
 			local args, results;
 			local limit, loop
-			
+
 			args = {};
 			if B ~= 1 then
 				if B ~= 0 then
@@ -479,27 +479,27 @@ local function create_wrapper(cache, upvalues)
 				else
 					limit = top
 				end
-				
+
 				loop = 0
 				for i = A+1, limit do
 					loop = loop + 1
 					args[loop] = stack[i];
 				end
-				
+
 				limit, results = handle_return(stack[A](unpack(args, 1, limit-A)))
 			else
 				limit, results = handle_return(stack[A]())
 			end
-			
+
 			top = A - 1
-		
+
 			if C ~= 1 then
 				if C ~= 0 then
 					limit = A+C-2;
 				else
 					limit = limit+A
 				end
-				
+
 				loop = 0;
 				for i = A, limit do
 					loop = loop + 1;
@@ -514,7 +514,7 @@ local function create_wrapper(cache, upvalues)
 			local stack = stack;
 			local args, results;
 			local top, limit, loop = top
-			
+
 			args = {};
 			if B ~= 1 then
 				if B ~= 0 then
@@ -522,18 +522,18 @@ local function create_wrapper(cache, upvalues)
 				else
 					limit = top
 				end
-				
+
 				loop = 0
 				for i = A+1, limit do
 					loop = loop + 1
 					args[#args+1] = stack[i];
 				end
-				
+
 				results = {stack[A](unpack(args, 1, limit-A))};
 			else
 				results = {stack[A]()};
 			end
-			
+
 			return true, results
 		end,
 		[30] = function(instruction) -- RETURN
@@ -543,7 +543,7 @@ local function create_wrapper(cache, upvalues)
 			local stack = stack;
 			local limit;
 			local loop, output;
-						
+
 			if B == 1 then
 				return true;
 			end
@@ -552,7 +552,7 @@ local function create_wrapper(cache, upvalues)
 			else
 				limit = A + B - 2;
 			end
-			
+
 			output = {};
 			local loop = 0
 			for i = A, limit do
@@ -564,11 +564,11 @@ local function create_wrapper(cache, upvalues)
 		[31] = function(instruction)	-- FORLOOP
 			local A = instruction.A
 			local stack = stack
-			
+
 			local step = stack[A+2]
-			local index = stack[A] + step 
+			local index = stack[A] + step
 			stack[A] = index
-			
+
 			if step > 0 then
 				if index <= stack[A+1] then
 					IP = IP + instruction.sBx
@@ -584,22 +584,22 @@ local function create_wrapper(cache, upvalues)
 		[32] = function(instruction)	-- FORPREP
 			local A = instruction.A
 			local stack = stack
-			
+
 			stack[A] = stack[A] - stack[A+2]
-			IP = IP + instruction.sBx 
+			IP = IP + instruction.sBx
 		end,
 		[33] = function(instruction)	-- TFORLOOP
 			local A = instruction.A
 			local B = instruction.B
 			local C = instruction.C
 			local stack = stack
-			
+
 			local offset = A+2
 			local result = {stack[A](stack[A+1], stack[A+2])}
 			for i = 1, C do
 				stack[offset+i] = result[i]
 			end
-			
+
 			if stack[A+3] ~= nil then
 				stack[A+2] = stack[A+3]
 			else
@@ -617,13 +617,13 @@ local function create_wrapper(cache, upvalues)
 			else
 				local offset = (C - 1) * 50
 				local t = stack[A]
-				
+
 				if B == 0 then
 					B = top
 				end
 				for i = 1, B do
-					t[offset+i] = stack[A+i]	
-				end				
+					t[offset+i] = stack[A+i]
+				end
 			end
 		end,
 		[35] = function(instruction)	-- CLOSE
@@ -634,7 +634,7 @@ local function create_wrapper(cache, upvalues)
 			local proto = prototypes[instruction.Bx]
 			local instructions = instructions
 			local stack = stack
-			
+
 			local indices = {}
 			local new_upvals = setmetatable({},
 				{
@@ -657,7 +657,7 @@ local function create_wrapper(cache, upvalues)
 				end
 				IP = IP + 1
 			end
-			
+
 			local _, func = create_wrapper(proto, new_upvals)
 			stack[instruction.A] = func
 		end,
@@ -665,17 +665,17 @@ local function create_wrapper(cache, upvalues)
 			local A = instruction.A
 			local B = instruction.B
 			local stack, vararg = stack, vararg
-			
+
 			for i = A, A + (B > 0 and B - 1 or vararg_size) do
 				stack[i] = vararg[i - A]
 			end
 		end,
 	}
-	
+
 	local function loop()
 		local instructions = instructions
 		local instruction, a, b
-		
+
 		while true do
 			instruction = instructions[IP];
 			IP = IP + 1
@@ -709,14 +709,14 @@ local function create_wrapper(cache, upvalues)
 				ghost_stack[k] = v
 			end;
 		})
-		local args = {...};	
+		local args = {...};
 		vararg = {}
 		vararg_size = select("#", ...) - 1
 		for i = 0, vararg_size do
 			local_stack[i] = args[i+1];
 			vararg[i] = args[i+1]
 		end
-		
+
 		environment = getfenv();
 		IP = 1;
 		local thread = coroutine.create(loop)
@@ -736,12 +736,12 @@ local function create_wrapper(cache, upvalues)
 				local line = cache.debug.lines[IP];
 				local err  = b:gsub("(.-:)", "");
 				local output = "";
-				
+
 				output = output .. (name and name .. ":" or "");
 				output = output .. (line and line .. ":" or "");
 				output = output .. b
 				--[[
-				output = ("%s (Instruction=%s)"):format(output, 
+				output = ("%s (Instruction=%s)"):format(output,
 					lua_opcode_names[select(2,debug.getlocal(loop,1, 1)).opcode+1])
 				--]]
 				error(output, 0);
